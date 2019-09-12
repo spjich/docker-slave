@@ -47,7 +47,18 @@ RUN curl --create-dirs -fsSLo /usr/share/jenkins/slave.jar https://repo.jenkins-
 #RUN echo "deb https://apt.dockerproject.org/repo debian-jessie main" >> /etc/apt/sources.list.d/docker.list
 #RUN apt-get update && apt-get install -y docker-engine
 #RUN gpasswd -a jenkins docker
-RUN curl -fsSL https://get.docker.com | bash
+#RUN curl -fsSL https://get.docker.com | bash
+
+USER root
+
+RUN usermod -G users -a jenkins && \
+    wget -q https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz -O /tmp/docker.tgz && \
+    tar xfvz /tmp/docker.tgz -C /tmp/ && \
+    cp /tmp/docker/docker /usr/local/bin && \
+    curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose && \
+    apt-get update && \
+    apt-get install make
 
 USER ${user}
 ENV AGENT_WORKDIR=${AGENT_WORKDIR}
