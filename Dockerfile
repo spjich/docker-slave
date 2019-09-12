@@ -13,6 +13,6 @@ RUN usermod -G users -a jenkins && \
 
 ENV JAVA_OPTS=-Xmx200m
 
-USER jenkins
+#USER jenkins
 
-WORKDIR /home/${user}
+WORKDIR /home/${jenkins}
