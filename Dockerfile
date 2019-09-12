@@ -24,13 +24,14 @@ FROM openjdk:8-jdk
 MAINTAINER Oleg Nenashev <o.v.nenashev@gmail.com>
 
 ARG VERSION=3.29
-ARG user=jenkins
-ARG group=jenkins
+ARG user=root
+ARG group=root
 ARG uid=1000
 ARG gid=1000
+USER ${user}
 
-RUN groupadd -g ${gid} ${group}
-RUN useradd -c "Jenkins user" -d /home/${user} -u ${uid} -g ${gid} -m ${user}
+#RUN groupadd -g ${gid} ${group}
+#RUN useradd -c "Jenkins user" -d /home/${user} -u ${uid} -g ${gid} -m ${user}
 LABEL Description="This is a base image, which provides the Jenkins agent executable (slave.jar)" Vendor="Jenkins project" Version="${VERSION}"
 
 ARG AGENT_WORKDIR=/home/${user}/agent
@@ -49,7 +50,6 @@ RUN curl --create-dirs -fsSLo /usr/share/jenkins/slave.jar https://repo.jenkins-
 #RUN gpasswd -a jenkins docker
 #RUN curl -fsSL https://get.docker.com | bash
 
-USER root
 
 RUN usermod -G users -a jenkins && \
     wget -q https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz -O /tmp/docker.tgz && \
@@ -60,7 +60,7 @@ RUN usermod -G users -a jenkins && \
     apt-get update && \
     apt-get install make
 
-USER ${user}
+
 ENV AGENT_WORKDIR=${AGENT_WORKDIR}
 RUN mkdir /home/${user}/.jenkins && mkdir -p ${AGENT_WORKDIR}
 
