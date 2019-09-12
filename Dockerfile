@@ -1,55 +1,6 @@
-# The MIT License
-#
-#  Copyright (c) 2015-2019, CloudBees, Inc. and other Jenkins contributors
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
-#
-#  The above copyright notice and this permission notice shall be included in
-#  all copies or substantial portions of the Software.
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
+FROM jenkinsci/slave:latest
 
-FROM openjdk:8-jdk
-MAINTAINER Oleg Nenashev <o.v.nenashev@gmail.com>
-
-ARG VERSION=3.29
-ARG user=root
-ARG group=root
-ARG uid=1000
-ARG gid=1000
-USER ${user}
-
-#RUN groupadd -g ${gid} ${group}
-#RUN useradd -c "Jenkins user" -d /home/${user} -u ${uid} -g ${gid} -m ${user}
-LABEL Description="This is a base image, which provides the Jenkins agent executable (slave.jar)" Vendor="Jenkins project" Version="${VERSION}"
-
-ARG AGENT_WORKDIR=/home/${user}/agent
-
-RUN echo 'deb http://deb.debian.org/debian stretch-backports main' > /etc/apt/sources.list.d/stretch-backports.list
- RUN apt-get update && apt-get install -t stretch-backports git-lfs
-RUN curl --create-dirs -fsSLo /usr/share/jenkins/slave.jar https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/${VERSION}/remoting-${VERSION}.jar \
-  && chmod 755 /usr/share/jenkins \
-  && chmod 644 /usr/share/jenkins/slave.jar
-# Docker installation
-#RUN echo "deb http://http.debian.net/debian wheezy-backports main" >> /etc/apt/sources.list.d/backports.list
-#RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:11371 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-#RUN apt-get update && apt-get install -y apt-transport-https ca-certificates
-#RUN echo "deb https://apt.dockerproject.org/repo debian-jessie main" >> /etc/apt/sources.list.d/docker.list
-#RUN apt-get update && apt-get install -y docker-engine
-#RUN gpasswd -a jenkins docker
-#RUN curl -fsSL https://get.docker.com | bash
-
+USER root
 
 RUN usermod -G users -a jenkins && \
     wget -q https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz -O /tmp/docker.tgz && \
@@ -60,10 +11,8 @@ RUN usermod -G users -a jenkins && \
     apt-get update && \
     apt-get install make
 
+ENV JAVA_OPTS=-Xmx200m
 
-ENV AGENT_WORKDIR=${AGENT_WORKDIR}
-RUN mkdir /home/${user}/.jenkins && mkdir -p ${AGENT_WORKDIR}
+USER jenkins
 
-VOLUME /home/${user}/.jenkins
-VOLUME ${AGENT_WORKDIR}
 WORKDIR /home/${user}
